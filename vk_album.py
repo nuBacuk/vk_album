@@ -49,7 +49,7 @@ def Url_Manager(request):
 
             #Обычный альбом
             elif re.match ('\d',str(url_album [1])) != None:
-                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id='+str(url_album[0])+'&album_id='+str(url_album[1])+'&count=11&v=5.50')).json()
+                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id='+str(url_album[0])+'&album_id='+str(url_album[1])+'&v=5.50')).json()
                 return Download_Url(photos_get,url_album)
             else:
                 #Ошибка пользователю, что не правильно введена ссылка
