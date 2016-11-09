@@ -11,4 +11,4 @@
 – pip install requets
 
 
-[Demo](https://devel0per.space/projects/vk_album/)
+[Demo](https://vkontakte.roothat.ru/)
