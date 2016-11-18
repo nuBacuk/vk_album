@@ -10,13 +10,22 @@ client_secret = 'g8uyxFMdQcnL9Hak5hup'  #Секретный ключи ваше�
 redirect_uri = 'http://127.0.0.1:8000/projects/vk_album/authorize'  #Ссылка для перееадресации указанная в приложении
 
 #Авторищация
-def Authorize(request):
-    if request.method == 'GET':
-        code = request.GET.get('code')
-        responce = (requests.get('https://oauth.vk.com/access_token?client_id='+client_id+'&client_secret='+client_secret+'&redirect_uri='+redirect_uri+'&code='+code)).json()
-        token = responce['access_token']
+def authorize(request):
+    code = request.GET.get('code')
+    redirect_url = __get_redirect_url(request)
+
+    response = (requests.get(
+        'https://oauth.vk.com/access_token?client_id=%s&client_secret=%s&redirect_uri=%s&code=%s'
+        % (client_id, client_secret, redirect_url, code))).json()
+    
+    request.session['access_token'] = response['access_token']
 
         return HttpResponseRedirect ('/projects/vk_album/')
+    
+def __get_redirect_url(request):
+    redirect_url = "%s://%s%s" % (
+        request.META['wsgi.url_scheme'], request.META['HTTP_HOST'], reverse('auth'))
+    return redirect_url
 
 #Главная форма
 class Form_Album(forms.Form):
@@ -34,22 +43,22 @@ def Url_Manager(request):
 
             #фотографии на странице
             if url_album[1] == '0':
-                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id='+str(url_album[0])+'&album_id=profile&count=11&v=5.50')).json()
+                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id=%s&album_id=profile&count=11&v=5.50', %str(url_album[0]))).json()
                 return Download_Url(photos_get,url_album)
 
             #фотографии на стене
             elif url_album[1] == '00?rev=1':
-                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id='+str(url_album[0])+'&album_id=wall&count=11&v=5.50')).json()
+                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id=%s&album_id=wall&count=11&v=5.50', %str(url_album[0]))).json()
                 return Download_Url(photos_get,url_album)
 
             #сохраненные фотографии
             elif url_album[1] == '000':
-                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id='+str(url_album[0])+'&album_id=saved&count=11&v=5.50')).json()
+                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id=%s&album_id=saved&count=11&v=5.50', %str(url_album[0]))).json()
                 return Download_Url(photos_get,url_album)
 
             #Обычный альбом
             elif re.match ('\d',str(url_album [1])) != None:
-                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id='+str(url_album[0])+'&album_id='+str(url_album[1])+'&v=5.50')).json()
+                photos_get = (requests.post('https://api.vk.com/method/photos.get?owner_id=%s&album_id=%s&v=5.50', % (str(url_album[0]), str(url_album[1])))).json()
                 return Download_Url(photos_get,url_album)
             else:
                 #Ошибка пользователю, что не правильно введена ссылка
@@ -76,15 +85,15 @@ def Download_Url(photos_get,url_album):
     #Выборка у каждого объекта лучшего разрешения
     for slice in photos_get['response']['items']:
             if 'photo_1280' in slice:
-                os.system('wget -P '+download_dir+' '+slice['photo_1280'])
+                os.system('wget -P %s%s', % (download_dir, slice['photo_1280']))
             elif 'photo_807' in slice:
-                os.system('wget -P '+download_dir+' '+slice['photo_807'])
+                os.system('wget -P %s%s', % (download_dir, slice['photo_807']))
             elif 'photo_604' in slice:
-                os.system('wget -P '+download_dir+' '+slice['photo_604'])
+                os.system('wget -P %s%s', % (download_dir, slice['photo_604']))
             elif 'photo_130' in slice:
-                os.system('wget -P '+download_dir+' '+slice['photo_130'])
+                os.system('wget -P %s%s', % (download_dir, slice['photo_130']))
             elif 'photo_75' in slice:
-                os.system('wget -P '+download_dir+' '+slice['photo_75'])
+                os.system('wget -P %s%s', % (download_dir, slice['photo_75']))
 
     #Архивирование изображений
     zip=ZipFile(download_dir+'.zip',mode='w')
