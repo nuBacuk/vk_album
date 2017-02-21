@@ -8,7 +8,7 @@
 
 
 Для работа потребуется модуль python:
-– pip install requets
+– pip install requests
 
 
-[Demo](https://vkontakte.roothat.ru/)
+[Demo](http://vk.roothub.pw/)
