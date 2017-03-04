@@ -5,7 +5,7 @@
 
 Поддерживается скачивание альбомов со стены, сохранённых изображений пользователем.
 
-
+<img src="https://habrastorage.org/files/97e/04e/1d8/97e04e1d899641fe852d41ec4f452f42.gif"/>
 
 Для работа потребуется модуль python:
 – pip install requests
